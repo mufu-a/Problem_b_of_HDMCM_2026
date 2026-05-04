@@ -1,0 +1,159 @@
+本节给出模板中常用排版方式的简要说明，供写作时参考。
+
+\subsection{公式与编号}
+这一部分可以按“规范 - 示例 - 常见错误”的顺序来讲。
+常用的公式环境有 \texttt{equation}、\texttt{align} 和 \texttt{subequations}。
+单行公式用 \texttt{equation}，多行推导用 \texttt{align}，相关公式组可用 \texttt{subequations} 统一编号。
+
+\begin{equation}\label{eq:simple}
+E = mc^2
+\end{equation}
+
+\begin{align}
+a &= b + c \label{eq:align-a}\\
+  &= d + e. \label{eq:align-b}
+\end{align}
+
+写公式时建议遵循“先编号，后引用”的顺序。
+\texttt{\textbackslash ref}、\texttt{\textbackslash eqref} 和 \texttt{\textbackslash cref} 的区别如下：
+\begin{itemize}
+    \item \texttt{\textbackslash ref\{eq:simple\}} 只输出编号本身，例如“1”。
+    \item \texttt{\textbackslash eqref\{eq:simple\}} 会自动加上圆括号，例如“(1)”。
+    \item \texttt{\textbackslash cref\{eq:simple\}} 会自动带上对象名称，例如\cref{eq:simple}。如果一次引用多个标签，也会自动处理成更自然的连写形式。
+\end{itemize}
+一般优先使用 \texttt{\textbackslash cref}。
+
+\paragraph{align 与 equation+aligned 的区别}
+\texttt{align} 适合多行推导，并且每一行都可以单独编号；如果某一行不需要编号，可以用 \texttt{\textbackslash nonumber} 或 \texttt{\textbackslash notag} 取消。
+这种写法适合中间步骤也需要单独引用的场景。
+
+\begin{align}
+f(x) &= x^2 + 1 \label{eq:align-demo-a}\\
+     &= (x+1)^2 - 2x. \label{eq:align-demo-b}
+\end{align}
+
+如果只是想把一个公式块排成多行，但仍然只给整个式子一个编号，可以在 \texttt{equation} 里嵌套 \texttt{aligned}。
+这种写法只产生一个编号，更适合“一个结论、多个对齐步骤”的情况。
+
+\begin{equation}\label{eq:equation-aligned}
+\begin{aligned}
+f(x) &= x^2 + 1\\
+     &= (x+1)^2 - 2x.
+\end{aligned}
+\end{equation}
+
+简要地说：
+\begin{itemize}
+    \item \texttt{align} = 多行推导，每行可独立编号。
+    \item \texttt{equation + aligned} = 一个编号的多行排版。
+    \item 如果只是显示公式、不需要编号，可用 \texttt{\textbackslash[ ... \textbackslash ]}。
+\end{itemize}
+
+\[
+f(x) = x^2 + 1
+\]
+
+\texttt{\textbackslash[ ... \textbackslash ]} 与 \texttt{equation} 的视觉效果接近，都是独立居中的显示公式；区别是前者默认不编号，后者默认编号。
+因此，若公式不需要引用，优先用 \texttt{\textbackslash[ ... \textbackslash ]}；若需要编号再引用，则用 \texttt{equation} 或 \texttt{align}。
+
+\paragraph{常见错误}
+\begin{enumerate}
+    \item \textbf{把普通文本直接放进数学模式。} 数学模式只适合变量、算子和公式结构，不适合写完整句子。
+
+    \[
+    \text{This is text}
+    \]
+
+    \item \textbf{把中文句子直接写进公式。} 公式环境中尽量只保留数学内容。
+
+    \[
+    \text{这是一个公式}
+    \]
+
+    \item \textbf{多行公式不用 \texttt{align}。} 需要对齐时，应使用 \texttt{align}，不要把每一行直接分开写。
+
+    \begin{align}
+    a &= b + c \\
+    d &= e + f
+    \end{align}
+
+    \item \textbf{微分写法不规范。} 建议写成 \texttt{\textbackslash int f(x)\textbackslash, \textbackslash mathrm\{d\}x}，不要直接写成 \texttt{dx}。
+
+    \[
+    \int f(x)\,\mathrm{d}x
+    \]
+    \item \textbf{正体使用不规范。} 变量用斜体，函数名、单位和常数用正体。比如$\mathrm{e}$、$\sin$、$\mathrm{kg}$等。
+    \item \textbf{ \texttt{\$\$...\$\$}是老版和Markdown用法。} 正式论文中不推荐使用 \texttt{\$\$}，应改用 \texttt{\textbackslash[...\textbackslash]} 或 \texttt{equation}。
+    \item \textbf{空格不会用。} 数学模式中的空格需要用 \texttt{\textbackslash,}、\texttt{\textbackslash;}、\texttt{\textbackslash quad} 等命令来控制，直接敲空格键是无效的。
+
+    \item \textbf{括号大小不匹配。} 分式较长时应使用自动伸缩括号。
+
+    \[
+    \left( \frac{a}{b} \right)
+    \]
+
+    \item \textbf{手工编号。} 不要直接写成 \texttt{(1)}，应使用 \texttt{\textbackslash label} 和 \texttt{\textbackslash ref} 自动引用。
+
+    \item \textbf{忽略特殊字符转义。} 例如 \texttt{\%}、\texttt{\$}、\texttt{\_}、\texttt{\&} 都需要转义后才能正常输出。
+
+\end{enumerate}
+
+\subsection{表格排版}
+表格建议使用 \texttt{booktabs} 的 \texttt{\textbackslash toprule}、\texttt{\textbackslash midrule}、\texttt{\textbackslash bottomrule}。
+尽量少用竖线，表头放在表格上方。
+
+\begin{table}[H]
+    \centering
+    \caption{表格排版示意}
+    \label{tab:layout}
+    \begin{tabular}{cc}
+        \toprule
+        符号 & 含义 \\
+        \midrule
+        $x$ & 变量 \\
+        $y$ & 观测值 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+正文中可写成表\cref{tab:layout}。
+
+\subsection{算法排版}
+如果需要展示求解步骤，建议使用 \texttt{algorithm} 和 \texttt{algorithmic}。
+这比直接堆列表更清晰，也更适合“输入 - 处理 - 输出”的结构。
+
+\begin{algorithm}[H]
+\caption{示意算法}
+\label{alg:demo}
+\begin{algorithmic}
+\STATE 输入：初始值 $x_0$
+\STATE 输出：结果
+\STATE 计算目标函数
+\WHILE{未收敛}
+    \STATE 更新变量
+\ENDWHILE
+
+\end{algorithmic}
+\end{algorithm}
+
+正文中可写成算法\cref{alg:demo}。
+
+\subsection{定理与证明}
+模板里已经定义了定理、引理、推论和证明环境。
+适合把结论、约束和关键推导分开写，逻辑会更清楚。
+
+\begin{theorem}
+若 $A$ 为对称矩阵，则其特征值均为实数。
+\end{theorem}
+
+\begin{proof}
+由对称矩阵的标准性质可知结论成立。
+\end{proof}
+
+\subsection{结构与附录}
+正文通常按“问题重述、问题分析、模型建立、问题求解、模型评价”的顺序组织。
+附录适合放推导细节、补充计算和完整代码，主文中只保留必要结果。
+
+\subsection{参考文献与交叉引用}
+正文中使用 \texttt{\textbackslash cite} 引用文献，文末由 \texttt{biblatex}/\texttt{biber} 根据 \texttt{reference.bib} 自动生成参考文献\cite{nan2017fast}。
+图、表、公式、算法最好都统一使用 \texttt{\textbackslash label} 配合 \texttt{\textbackslash cref} 或 \texttt{\textbackslash ref} 引用，避免手工编号出错。

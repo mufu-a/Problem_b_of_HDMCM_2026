@@ -1,0 +1,268 @@
+\subsection{运输成本核算模型}
+
+\subsubsection{球面距离与道路距离}
+
+从仓库出发至目的地的运输距离是成本计算的基础。设出发点（南通市崇川区）经纬度为 $(\varphi_0, \lambda_0) = (31.98^\circ\mathrm{N}, 120.90^\circ\mathrm{E})$，目的地城市 $i$ 的经纬度为 $(\varphi_i, \lambda_i)$，使用Haversine公式\cite{sinnott1984haversine}计算两点间的球面大圆距离：
+
+\begin{equation}\label{eq:haversine}
+d_{\mathrm{s}} = 2R \arcsin\!\left(\sqrt{\sin^2\!\left(\frac{\Delta\varphi}{2}\right) + \cos\varphi_0 \cos\varphi_i \sin^2\!\left(\frac{\Delta\lambda}{2}\right)}\right)
+\end{equation}
+
+其中 $R = 6371\,\mathrm{km}$ 为地球平均半径，$\Delta\varphi = \varphi_i - \varphi_0$，$\Delta\lambda = \lambda_i - \lambda_0$。
+
+实际道路距离通常大于球面直线距离，且不同地形区域的道路网络密度差异明显。为此引入区域差异化的道路绕行系数 $\beta_r$\cite{ballou2002circuity}：
+
+\begin{equation}\label{eq:road}
+d_{\mathrm{r}} = \beta_r \cdot d_{\mathrm{s}},\qquad \beta_r = \begin{cases}
+1.25, & \text{东部地区}\\
+1.40, & \text{中部地区}\\
+1.60, & \text{西部地区}
+\end{cases}
+\end{equation}
+
+\subsubsection{运输成本构成}
+
+每趟运输的总成本由可变成本和固定成本两大部分构成。对于往返运输，去程满载、回程空载：
+
+\textbf{可变成本（往返）：} 包括油费和路桥费。去程按满载计，回程空载油耗降为满载的 $\alpha$ 倍（$\alpha = 0.75$）\cite{coyle2006transportation}，路桥费不受负载影响：
+
+\begin{equation}\label{eq:var}
+\begin{aligned}
+C_{\mathrm{var}}^{\mathrm{round}} &= C_{\mathrm{var}}^{\mathrm{out}} + C_{\mathrm{var}}^{\mathrm{return}}\\
+&= C_{\mathrm{var}}^{\mathrm{per\_km}} \cdot d_{\mathrm{r}} + \left(\alpha \cdot C_{\mathrm{fuel}}^{\mathrm{per\_km}} + C_{\mathrm{toll}}^{\mathrm{per\_km}}\right) \cdot d_{\mathrm{r}}
+\end{aligned}
+\end{equation}
+
+\textbf{固定成本（往返）：} 人工成本、保险、审验、违章、轮胎损耗、维修保养和折旧七项在往返两程各计一次（共2倍），其中各项按不同的摊销周期转换为日成本：
+
+\begin{equation}\label{eq:fix_items}
+\begin{aligned}
+C_{\mathrm{labor}}^{\mathrm{day}} &= \frac{\text{人工年成本}}{280} \quad (\text{工作天})\\
+C_{\mathrm{ins}}^{\mathrm{day}} &= \frac{\text{保险年成本}}{365} \quad (\text{日历天})\\
+C_{\mathrm{insp}}^{\mathrm{day}} &= \frac{\text{审验年成本}}{365} \quad (\text{日历天})\\
+C_{\mathrm{viol}}^{\mathrm{day}} &= \frac{\text{违章年成本}}{365} \quad (\text{日历天})\\
+C_{\mathrm{tire}}^{\mathrm{day}} &= \frac{\text{轮胎年成本}}{280} \quad (\text{工作天})\\
+C_{\mathrm{maint}}^{\mathrm{day}} &= \frac{\text{维保年成本}}{300} \quad (\text{维保天})\\
+C_{\mathrm{depr}}^{\mathrm{day}} &= \frac{\text{车辆购置价} - \text{报废补贴}}{4 \times 280} \quad (\text{4年折旧, 工作天})
+\end{aligned}
+\end{equation}
+
+每日固定成本总和为 $C_{\mathrm{fix}}^{\mathrm{day}} = \sum C_{\mathrm{*}}^{\mathrm{day}}$。往返固定成本为：
+
+\begin{equation}\label{eq:fix}
+C_{\mathrm{fix}}^{\mathrm{round}} = 2 \cdot C_{\mathrm{fix}}^{\mathrm{day}} \cdot T
+\end{equation}
+
+其中 $T$ 为往返运输天数，由单程距离和驾驶速度估算。
+
+\textbf{单趟运输总成本：} 综合以上各部分，一趟运输的总成本为：
+
+\begin{equation}\label{eq:trip_cost}
+C_{\mathrm{trip}} = C_{\mathrm{var}}^{\mathrm{round}} + C_{\mathrm{fix}}^{\mathrm{round}}
+\end{equation}
+
+\textbf{运输总费用：} 所有运输趟次的成本之和：
+
+\begin{equation}\label{eq:total_cost}
+C_{\mathrm{total}} = \sum_{k=1}^{N} C_{\mathrm{trip}}^{(k)}
+\end{equation}
+
+\subsection{Clarke-Wright拼车优化模型}
+
+\subsubsection{方向聚类与可行性约束}
+
+拼车的前提是多个目的地城市在同一条合理的路径上。首先计算各城市相对于出发点的方位角\cite{bowditch2002navigator}：
+
+\begin{equation}\label{eq:bearing}
+\theta = \arctan\!2\Big(\sin(\Delta\lambda)\cos\varphi_i,\; \cos\varphi_0\sin\varphi_i - \sin\varphi_0\cos\varphi_i\cos(\Delta\lambda)\Big)
+\end{equation}
+
+对于任意两个城市 $i$ 和 $j$，拼车的可行性需满足以下约束：
+
+\begin{enumerate}
+    \item \textbf{方向可行性：}两城市的方位角差异不超过阈值 $\theta_d$，$|\theta_i - \theta_j| \leq \theta_d$。
+    \item \textbf{距离可行性：}两城市之间的道路距离不超过上限 $d_{\max}$，$d_{\mathrm{r}}(i,j) \leq d_{\max}$。
+    \item \textbf{组内跨度约束：}合并后的路线中，最大方位角与最小方位角之差不超过 $\theta_g$。
+    \item \textbf{容量约束：}合并后路线中所有城市的货物托盘总数不超过所选车型的承载上限 $Q_v$。
+\end{enumerate}
+
+\subsubsection{CW节约算法}
+
+对于符合可行性约束的两城市 $i$ 和 $j$，若将它们从分别独立往返合并为一条路线（从仓库依次访问 $i$ 和 $j$ 后返回），可节约的运输距离为：
+
+\begin{equation}\label{eq:cw_saving_dist}
+\Delta d_{ij} = d_{0i} + d_{j0} - d_{ij}
+\end{equation}
+
+节约的成本为距离节约带来的可变成本减少加上运输天数缩短带来的固定成本减少：
+
+\begin{equation}\label{eq:cw_saving}
+s_{ij} = C_{\mathrm{var}}^{\mathrm{per\_km}} \cdot \Delta d_{ij} + C_{\mathrm{fix}}^{\mathrm{day}} \cdot \Delta T_{ij}
+\end{equation}
+
+其中 $\Delta T_{ij}$ 为合并前后运输天数的变化。$s_{ij} > 0$ 时说明合并是有利可图的。
+
+\subsubsection{算法流程}
+
+CW算法以贪心方式构造路线合并：首先将所有城市视为独立的单点路线；计算所有可行城市对的节约值并按降序排序；依次处理每条候选边，若合并两端城市所属路线不违反可行性约束，则执行合并，将两条路线连接为一条更大的路线。合并过程中使用并查集维护路线归属。
+
+\subsubsection{TSP路线排序}
+
+对于每条包含 $m$ 个城市的合并路线，需确定从仓库出发访问所有城市并返回的最优顺序。采用最近邻构造算法生成初始路径，然后使用2-opt局部搜索进行改进：
+
+\begin{enumerate}
+    \item 从仓库出发，每次选择距当前城市最近、尚未访问的城市作为下一站；
+    \item 重复直至所有城市访问完毕，返回仓库；
+    \item 对所有可能的边对 $(p,q)$ 和 $(r,s)$ 执行2-opt交换（将边 $pq$ 和 $rs$ 替换为 $pr$ 和 $qs$），若交换后路径总距离缩短则保留，直至无法进一步改进。
+\end{enumerate}
+
+\subsubsection{多站路线成本计算}
+
+完成路线排序后，路线 $k$ 的总往返距离 $D_k$ 为依次访问所有城市并返回仓库的道路距离之和。运输天数由驾驶时间和装卸时间共同决定：
+
+\begin{equation}\label{eq:travel_days}
+T_k = \max\!\left(1,\; \left\lceil \frac{D_k}{v_h \cdot H_d} + \frac{m_k \cdot t_{\mathrm{lu}}}{H_w} \right\rceil \right)
+\end{equation}
+
+其中 $v_h$ 为车辆平均行驶速度（单位：$\mathrm{km/h}$），$t_{\mathrm{lu}}$ 为单次装卸货时间（单位：$\mathrm{h}$），$H_d = 10\,\mathrm{h}$ 为每日驾驶时间上限，$H_w = 8\,\mathrm{h}$ 为每日装卸工作窗口。路线总成本按 \cref{eq:trip_cost} 计算，根据实际托盘数选择满足容量约束且成本最低的车型。
+
+\subsection{熵权法派车合理性评估模型}
+
+\subsubsection{六维评估指标体系}
+
+从配送效率、路线质量、时效表现、需求结构、合规水平和运力利用六个维度构建评估指标体系：
+
+\textbf{指标1——配送密度（分层，中间型指标）：} 区分市内配送和干线运输，分别以行业经验确定最优停靠点区间——市内配送并非停靠点越多越好，过多意味着单点服务时间不足、存在质量风险。市内以 $[12, 18]$ 点/日为最优区间，干线以 $[3, 5]$ 点/日为最优区间；区间内得满分，偏离两侧则线性扣分。各车辆的配送密度按类型分层后得分。
+
+\textbf{指标2——路线合并潜力：} 对各仓库的配送目的地，计算使用CW算法可节约距离的比例，并将其线性映射到得分区间。
+
+\textbf{指标3——时效达标率：} 根据运单中的运输时效要求（送货、次日送达、急送等），统计在时限内完成的订单占比。
+
+\textbf{指标4——线路集中度：} 基于信息熵衡量各仓库运单在"线路号"维度上的分布集中程度。集中度高意味着订单集中在少数成熟线路上，易形成规模效应与标准化管理；集中度低意味着需求碎片化、线路分散，难以通过合并实现降本增效。
+
+\textbf{指标5——冷链合规率：} 冷链药品订单中实际使用冷藏车配送的比例。冷链药品必须由冷藏车运输，常温车配送冷链订单视为不合规。
+
+\textbf{指标6——车辆装载饱和度：} 以各车型（小型车、中型车、大型车、冷藏车）在全量数据中的第75百分位数装载量为基准，计算每个车辆日的装载量相对于该基准的饱和度。饱和度越高说明运力利用越充分，长期低于行业p75水平的仓库存在运力浪费。
+
+各指标的得分通过行业基准映射函数转换为0至100分的绝对评分。以下给出各指标评分函数的具体计算公式。
+
+{\bf 指标1——配送密度（分层，中间型指标）：}设仓库 $k$ 有 $n_k^c$ 个市内型车辆日和 $n_k^l$ 个干线型车辆日，两者的划分标准为：若某车辆日之市内停靠点数 $\geq$ 干线停靠点数，则归入市内型，否则归入干线型。记市内型车辆日的平均停靠点数为 $\bar{a}_k^c$，干线型车辆日的平均停靠点数为 $\bar{a}_k^l$。配送密度属于中间型指标——停靠点过少说明调度效率低、车辆空转严重；停靠点过多则意味着单点卸货时间被压缩、服务质量存疑。因此采用梯形隶属函数：最优区间内获满分，偏离两侧则线性递减。市内配送的最优区间为 $[12, 18]$ 点/日，干线运输的最优区间为 $[3, 5]$ 点/日：
+
+
+\begin{equation}\label{eq:score_s1_city}
+S_{k1}^c = \begin{cases}
+\dfrac{\bar{a}_k^c}{12} \times 100, & \bar{a}_k^c < 12\\
+100, & 12 \leq \bar{a}_k^c \leq 18\\
+\max\!\left(100 - \dfrac{\bar{a}_k^c - 18}{18} \times 100,\; 0\right), & \bar{a}_k^c > 18
+\end{cases}
+\end{equation}
+
+\begin{equation}\label{eq:score_s1_line}
+S_{k1}^l = \begin{cases}
+\dfrac{\bar{a}_k^l}{3} \times 100, & \bar{a}_k^l < 3\\
+100, & 3 \leq \bar{a}_k^l \leq 5\\
+\max\!\left(100 - \dfrac{\bar{a}_k^l - 5}{5} \times 100,\; 0\right), & \bar{a}_k^l > 5
+\end{cases}
+\end{equation}
+
+{\bf 指标2——路线合并潜力：}对于仓库 $k$ 的每一个车辆日 $v$，设其目的地集合为 $D_v$（$|D_v| \geq 2$）。分别计算独立往返总距离 $\sum_{d \in D_v} 2 d_{\mathrm{r}}(0,d)$ 与TSP优化后路线总距离 $d_{\mathrm{tsp}}(D_v)$，该车辆日的距离节约比例为 $p_v = \dfrac{\sum_{d \in D_v} 2 d_{\mathrm{r}}(0,d) - d_{\mathrm{tsp}}(D_v)}{\sum_{d \in D_v} 2 d_{\mathrm{r}}(0,d)} \times 100\%$。取所有车辆日节约比例的均值 $\bar{p}_k$，并作线性映射至得分区间：
+
+\begin{equation}\label{eq:score_s2}
+S_{k2} = \min\!\bigl(\max\!\bigl(50 + \bar{p}_k,\; 0\bigr),\; 100\bigr)
+\end{equation}
+
+该设计使得节约率为50\%时获得满分100分，节约率为0\%时获得50分（及格线），节约率为负时降至50分以下。
+
+{\bf 指标3——时效达标率：}设仓库 $k$ 的运单中共涉及 $M_k$ 个有时效要求的订单，其中在第 $m$ 个订单的规定时限内完成配送的订单数为 $M_k^{\text{ok}}$，则：
+
+\begin{equation}\label{eq:score_s3}
+S_{k3} = \frac{M_k^{\text{ok}}}{M_k} \times 100
+\end{equation}
+
+若无时效订单（$M_k = 0$），则记 $S_{k3} = 100$。
+
+{\bf 指标4——线路集中度：}设仓库 $k$ 的运单共涉及 $L_k$ 条线路，第 $i$ 条线路的订单占比为 $p_i$（$\sum_{i=1}^{L_k} p_i = 1$）。定义线路分布的香农熵 $H_k = -\sum_{i=1}^{L_k} p_i \ln p_i$，其最大可能值为等分布时的 $\ln L_k$。则标准化集中度为：
+
+\begin{equation}\label{eq:score_s4}
+S_{k4} = \left(1 - \frac{H_k}{\ln L_k}\right) \times 100
+\end{equation}
+
+若 $L_k = 1$（所有订单集中在唯一线路上），则 $H_k = 0$，$S_{k4} = 100$；若所有线路均匀分布，则 $H_k = \ln L_k$，$S_{k4} = 0$。该指标衡量的是需求结构的成熟度——线路越集中，说明仓库拥有稳定的骨干线路网络，有利于批量运输与路线固化带来的效率提升。
+
+{\bf 指标5——冷链合规率：}设仓库 $k$ 的运单中包含 $C_k$ 个冷链药品订单，其中实际使用了冷藏车配送的订单数为 $C_k^{\text{cold}}$，则：
+
+\begin{equation}\label{eq:score_s5}
+S_{k5} = \frac{C_k^{\text{cold}}}{C_k} \times 100
+\end{equation}
+
+若无冷链订单（$C_k = 0$），则记 $S_{k5} = 100$。冷链药品必须由冷藏车运输；常温车配送冷链订单即构成不合规。
+
+{\bf 指标6——车辆装载饱和度：}对于仓库 $k$ 的每一个车辆日 $v$，设其车辆分类为 $c$（小型车、中型车、大型车或冷藏车），该车辆日的总装载件数为 $q_v$。以全体数据中各车型装载量的第75百分位数 $Q_{75}^c$ 为基准，定义该车辆日的装载饱和度为：
+
+\begin{equation}\label{eq:load_sat}
+s_v = \min\!\left(\frac{q_v}{Q_{75}^c} \times 100,\; 100\right)
+\end{equation}
+
+饱和度达到或超过100\%表示该车辆日的装载量已处于行业前25\%水平，运力利用充分。仓库 $k$ 的装载饱和度得分取全部车辆日饱和度的平均值：
+
+\begin{equation}\label{eq:score_s6}
+S_{k6} = \frac{1}{V_k} \sum_{v=1}^{V_k} s_v
+\end{equation}
+
+其中 $V_k$ 为仓库 $k$ 的车辆日总数。该指标衡量的是车辆运力利用效率——装载过少意味着运力浪费、单位运输成本偏高；接近或超过行业p75基准则表明运力利用充分。
+
+\subsubsection{熵权法客观赋权}
+
+熵权法基于各指标在仓库间得分的差异程度确定权重。差异越大的指标，提供的信息量越大，应赋予更高的权重\cite{shannon1948mathematical,郭显光1998熵权}。计算步骤如下：
+
+\textbf{步骤一——数据归一化：} 将各仓库得分矩阵 $S = (S_{kj})_{n \times m}$（$n$ 个仓库，$m$ 个指标）进行极差归一化：
+
+\begin{equation}\label{eq:normalize}
+r_{kj} = \frac{S_{kj} - \min_k(S_{kj})}{\max_k(S_{kj}) - \min_k(S_{kj})}
+\end{equation}
+
+\textbf{步骤二——计算比重矩阵：}
+
+\begin{equation}\label{eq:proportion}
+p_{kj} = \frac{r_{kj}}{\sum_{k=1}^{n} r_{kj}}
+\end{equation}
+
+\textbf{步骤三——计算各指标的信息熵：}
+
+\begin{equation}\label{eq:entropy}
+e_j = -\frac{1}{\ln n} \sum_{k=1}^{n} p_{kj} \ln(p_{kj})
+\end{equation}
+
+当 $p_{kj} = 0$ 时，取 $p_{kj}\ln(p_{kj}) = 0$。
+
+\textbf{步骤四——计算差异系数与权重：} 差异系数 $d_j = 1 - e_j$，指标权重为差异系数的归一化：
+
+\begin{equation}\label{eq:weight}
+w_j = \frac{d_j}{\sum_{j=1}^{m} d_j}
+\end{equation}
+
+\subsubsection{综合得分与系统评价}
+
+各仓库的综合得分为各指标绝对得分的加权和：
+
+\begin{equation}\label{eq:composite}
+F_k = \sum_{j=1}^{m} w_j \cdot S_{kj}
+\end{equation}
+
+系统层面的总得分以各仓库的车辆日数为权重进行加权平均：
+
+\begin{equation}\label{eq:system}
+F_{\mathrm{sys}} = \frac{\sum_{k=1}^{n} N_k \cdot F_k}{\sum_{k=1}^{n} N_k}
+\end{equation}
+
+其中 $N_k$ 为仓库 $k$ 的车辆日数。此外，使用TOPSIS方法\cite{hwang1981multiple}计算各仓库与理想解和负理想解的贴近度，对综合得分排名进行辅助验证。
+
+\subsubsection{三层递进优化模型}
+
+针对派车安排的优化采用三层递进策略：
+
+\textbf{第1层——TSP路径排序：} 对每个车辆日内访问的多个目的地，使用最近邻构造加2-opt改进算法重排访问顺序\cite{lin1965computer}，缩短单个车辆日的行驶总距离。
+
+\textbf{第2层——同城同日合并：} 同一仓库在同一天可能有多个车辆独立配送相同方向的城市。将同一仓库、同一日期的常温车和冷链车分别合并，使用CW算法\cite{clarke1964scheduling}将多条车辆日合并为更少的路线，分离冷链与常温品类以符合冷链合规要求。
+
+\textbf{第3层——车型最优匹配：} 合并后的路线货物总量可能发生变化，需要重新选择最优车型。对于冷链药品路线，强制选择冷藏车型；对于常温药品路线，在满足容量约束的前提下选择综合成本最低的车型。

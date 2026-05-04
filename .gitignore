@@ -1,0 +1,14 @@
+# Excluded per user request
+B题附件/
+CLAUDE.md
+final_essay/main.pdf
+final_essay/main.synctex.gz
+final_essay/AI工具使用详情.pdf
+final_essay/AI工具使用详情.tex
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc

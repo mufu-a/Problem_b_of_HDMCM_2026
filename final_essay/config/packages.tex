@@ -1,0 +1,119 @@
+% 基础宏包与数学命令
+% Basic packages and shared math macros
+
+% 基础符号与文本环境
+% Core symbols and text utilities
+\usepackage{latexsym}
+\usepackage{enumerate}
+\usepackage{verbatim}
+
+% 中文文档与页面版式
+% Chinese document support and page layout
+\usepackage{fontspec}
+\usepackage{geometry}
+\geometry{a4paper,left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+% 数学排版与公式环境
+% Math typesetting and formula environments
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{bm}
+\usepackage[subnum]{cases}
+
+% 图表与浮动体
+% Figures, tables, and floating objects
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{setspace}
+\usepackage{graphicx}
+\graphicspath{{figure/}}
+\usepackage{subcaption}
+\usepackage[dvipsnames]{xcolor}
+
+% 算法、代码与填充文本
+% Algorithms, code listings, and filler text
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{lipsum}
+\usepackage{listings}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+
+% 其他常用工具
+% Other common utilities
+\usepackage{hyperref}
+\hypersetup{hypertex=true,
+colorlinks=true,
+linkcolor = black,
+anchorcolor = black,
+citecolor = black}
+\usepackage{cleveref}
+\crefname{figure}{\textcolor{blue!80!black}{图}}{\textcolor{blue!80!black}{图}}
+\crefname{table}{\textcolor{blue!80!black}{表}}{\textcolor{blue!80!black}{表}}
+\crefname{equation}{\textcolor{blue!80!black}{式}}{\textcolor{blue!80!black}{式}}
+\crefname{algorithm}{\textcolor{blue!80!black}{算法}}{\textcolor{blue!80!black}{算法}}
+
+% 常用数学算子
+% Common math operators
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\minimax}{minimax}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\Span}{Span}
+\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\nullspace}{null}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\diam}{diam}
+
+% 常用微分和向量记号
+% Common differential and vector notation
+\newcommand{\curl}{\text{\bf curl }}
+\newcommand{\dx}{\mathrm{d}x}
+\newcommand{\dy}{\mathrm{d}y}
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand{\ds}{\mathrm{d}s}
+\newcommand{\dS}{\mathrm{d}S}
+\newcommand{\dt}{\mathrm{d}t}
+\newcommand{\dd}{\d}
+\renewcommand{\d}{\mathrm{d}}
+
+% 定理环境
+% Theorem environments
+\newtheorem{definition}{\hspace{2em}定义}
+\newtheorem{theorem}{\hspace{2em}定理}
+\newtheorem{lemma}{\hspace{2em}引理}
+\newtheorem{corollary}{\hspace{2em}推论}[section]
+\renewcommand{\proofname}{\hspace{2em}证明}
+
+% TikZ 绘图库
+% TikZ libraries
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{shapes.geometric,arrows}
+\tikzset{ellbox/.style = {ellipse, draw=black, fill=blue!10}}
+
+% 标题格式：一级标题四号黑体居中，二/三级标题小四号黑体左对齐
+\ctexset{
+    section = {
+        format = \zihao{4}\heiti\centering,
+    },
+    subsection = {
+        format = \zihao{-4}\heiti\raggedright,
+    },
+    subsubsection = {
+        format = \zihao{-4}\heiti\raggedright,
+    }
+}
+
+% 正文单倍行距
+\singlespacing

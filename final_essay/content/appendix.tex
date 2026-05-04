@@ -1,0 +1,59 @@
+\section{附录：AI工具使用详情}
+
+\subsection{基本信息表}
+
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{lp{10cm}}
+        \toprule[1.5pt]
+        项目 & 填写内容 \\
+        \midrule[1pt]
+        工具名称 & Claude Code \\
+        \midrule
+        版本/型号 & deepseek-v4-pro\\
+        \midrule
+        开发机构/公司 & Anthropic、杭州深度求索人工智能基础技术研究有限公司 \\
+        \midrule
+        使用日期范围 & 2026年4月30日 — 2026年5月4日 \\
+        \midrule
+        使用目的和环节 & 辅助搭建模型框架、协助编写Python求解代码（代码已一起上传）、辅助论文latex写作、润色与格式排版、数据一致性校验 \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+    \caption{AI工具使用基本信息}
+    \label{tab:ai-basic}
+\end{table}
+
+\subsection{具体交互记录}
+
+\begin{longtable}{p{1.8cm}p{4.1cm}p{4.1cm}p{4.1cm}}
+    \toprule[1.5pt]
+    使用环节 & 关键提示词（Prompt） & AI生成内容概要 & 采纳及修改情况 \\
+    \midrule[1pt]
+    \endfirsthead
+    \multicolumn{4}{c}{\small 续表：AI工具具体交互记录} \\
+    \toprule[1.5pt]
+    使用环节 & 关键提示词（Prompt） & AI生成内容概要 & 采纳及修改情况 \\
+    \midrule[1pt]
+    \endhead
+    \midrule
+    \multicolumn{4}{r}{\small 续下页} \\
+    \endfoot
+    \bottomrule[1.5pt]
+    \caption{AI工具具体交互记录}
+    \label{tab:ai-interactions}
+    \endlastfoot
+    代码编写 & 我已经在tex文档中有了初步的模型，第一题给出了相应公式，书写代码读取数据，进行计算 & 提供了读取数据和计算的Python代码框架 & 采纳并调整了数据读取方式，填写到了tex文档中 \\
+        \midrule
+        代码编写 & “在first.py中增加成本子项明细输出，包括去程油费、回程油费、路桥费、人工、保险、审验、违章、胎耗、维保、折旧等11项” & 提供了calc\_cost\_details函数框架，使用pandas apply扩展列输出 & 采纳代码框架，仔细检查输出无误，填写到tex文档里 \\
+        \midrule
+        代码编写 & “第二题我已经在tex文档中有了模型，编写CW+TSP排序拼车优化算法的代码，加入方向约束和距离约束，并按照我预设的值进行参数网格搜索” & 提供了Clarke-Wright节约算法的Python实现，包含方位角过滤和城市间距离上限约束 & 采纳核心算法逻辑，补充了跨周合并开关和网格搜索功能 \\
+        \midrule
+        代码编写 & “第三题我已经在tex文档中有了模型，设计了一些打分的函数，并利用熵权法计算权重，TOPSIS法辅助验证合理性，编写基于熵权法的六维评估指标体系的代码” & 提供了熵权法的Python实现，包含指标权重计算和综合得分计算 & 采纳核心算法逻辑，补充了数据预处理和结果输出功能 \\
+        \midrule
+        图表制作 & “将一些表格数据进行可视化，比如生成运输成本构成饼图（可变成本/固定成本）、固定成本明细饼图、可变成本明细饼图等等” & 提供了matplotlib绘制的代码 & 采纳并调整了中文字体设置和字号大小，手动嵌入了tex文档的对应位置\\
+        \midrule
+        数据校验 & “逐一比对tex中的数值与Python终端输出是否一致” & 发现多处数值不一致（如西部单趟成本与东部的比值、折旧占固定成本比例等）并逐一修正 & 全部修正，确保tex中所有数据均来自Python实际计算结果 \\
+        \midrule
+        论文写作 & “根据我提供的论文框架和内容，进行润色与格式排版,并检查有无错别字，提出建议即可。” & 提供了针对论文内容的润色建议，给出了部分句子结构和用词的建议 & 部分采纳并调整了论文的格式，确保符合要求 \\
+\end{longtable}
+

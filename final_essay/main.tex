@@ -1,0 +1,93 @@
+\documentclass[12pt,fontset=fandol]{ctexart}
+\input{config/packages.tex}
+\input{config/format.tex}
+
+
+
+\title{医药冷链物流运输优化模型研究}
+
+
+
+\begin{document}
+	\maketitle
+
+\vspace{1em}
+
+\begin{center}
+{\zihao{4}\heiti 摘\quad 要}
+\end{center}
+
+\vspace{0.5em}
+
+本文围绕医药冷链物流运输优化问题，分别从运输成本核算、拼车路线优化和派车合理性评估三个层面展开研究。针对附件1的车辆成本参数和附件2的排货信息，建立了改进的运输成本核算模型；在此基础上，利用Clarke-Wright节约算法实现了拼车运输优化；针对附件3和附件4的大规模运单与派车数据，构建了基于熵权法的六维评估指标体系，并提出了三层递进优化方案。
+
+{\bf 对于问题一：} 建立了区域差异化的往返运输成本核算模型。使用Haversine球面距离公式，结合东部（1.25）、中部（1.40）、西部（1.60）三区域的道路绕行系数估算实际道路距离。成本模型区分可变成本（油费、路桥费）与固定成本（人工、保险、审验、违章、胎耗、维保、折旧），考虑回程空载油耗系数0.75、工作天（280天）与日历天（365天）的差异化分摊以及车辆折旧。计算结果表明，2018年8月24日至11月23日期间，南通仓库共完成294趟运输，覆盖43个城市，运输总费用为3,846,906.89元。其中可变成本占48.1\%，固定成本占51.9\%；7.6M车型承担了93.2\%的运输趟次；东部地区成本占45.9\%，中部占26.2\%，西部占27.9\%。
+
+{\bf 对于问题二：} 在问题一成本模型基础上，建立了带方向约束和距离约束的Clarke-Wright拼车优化模型。通过方位角方向聚类筛选可行合并对，计算节约值并施加容量约束（7.6M型11托、9.6M型14托）、方向偏离约束（≤90°）、城市间距离约束（≤500\,km）和组内跨度约束（≤120°），使用TSP排序优化各路线访问顺序。72组参数网格搜索的结果表明，最优参数组合下，运输路线从294条减至127条（减少56.8\%），总成本从3,846,906.89元降至1,706,894.88元，节约金额2,140,012.02元，节约率达55.63\%。
+
+{\bf 对于问题三：} 建立了涵盖配送密度（分层市内/干线基准）、路线合并潜力、时效达标率、线路集中度、冷链合规率和装载饱和度六维指标的评估体系。采用熵权法根据各指标在54个仓库间的信息差异程度客观赋权，得到路线合并潜力权重最高（34.91\%）、时效达标率权重最低（1.37\%）的权重分配。系统加权综合得分为50.0分（满分为100分），评级为"需改进"。识别出23个仓库存在冷链合规率低于50\%的系统性风险。在优化方面，实施三层递进方案——TSP路径排序（节约5.6\%）、同城同日合并与车型优化匹配（冷链车辆强制约束），最终将周度总成本从1,135.3万元降至717.5万元，节约率达36.8\%。
+
+{\bf 三个问题存在严密的逻辑递进关系：}问题一首先建立了改进的运输成本核算模型，为后续优化提供了精确的距离计算、成本构成分析以及数据预处理基础；问题二在问题一成本模型的基础上，利用Clarke-Wright节约算法并引入方向约束、距离约束等机制，实现了拼车运输的高效优化，进一步降低了运营成本；问题三则进一步拓展至终端配送场景，构建了基于熵权法的六维评估指标体系，并提出了三层递进优化方案，从而形成了从成本精确核算，到路线优化，再到派车方案评估与改进的完整逻辑链条。
+
+\vspace{1em}
+
+\newpage
+\setcounter{page}{1}
+
+\section{问题重述}\label{sec:problem-statement}
+\input{content/problem-statement.tex}
+˜
+
+\section{问题分析}\label{sec:problem-analysis}
+\input{content/problem-analysis.tex}
+
+\section{模型中的假设与符号}\label{sec:assumptions-and-symbols}
+\input{content/assumptions-and-symbols.tex}
+
+\section{模型的建立}\label{sec:model-construction}
+\input{content/model-construction.tex}
+
+\section{模型应用与问题求解}\label{sec:problem-solving}
+\input{content/problem-solving.tex}
+
+\section{模型评价}\label{sec:model-evaluation}
+\input{content/model-evaluation.tex}
+
+
+\newpage
+
+\begin{thebibliography}{99}
+
+\bibitem{sinnott1984haversine}
+Sinnott R W. Virtues of the Haversine[J]. Sky and Telescope, 1984, 68: 158.
+
+\bibitem{ballou2002circuity}
+Ballou R H, Rahardja H, Sakai N. Selected country circuity factors for road travel distance estimation[J]. Transportation Research Part A: Policy and Practice, 2002, 36(9): 843-848.
+
+\bibitem{coyle2006transportation}
+Coyle J J, Bardi E J, Novack R A. Transportation[M]. 6th ed. Mason: Thomson South-Western, 2006.
+
+\bibitem{bowditch2002navigator}
+Bowditch N. The American Practical Navigator[M]. Bethesda: National Imagery and Mapping Agency, 2002.
+
+\bibitem{shannon1948mathematical}
+Shannon C E. A mathematical theory of communication[J]. The Bell System Technical Journal, 1948, 27(3): 379-423.
+
+\bibitem{郭显光1998熵权}
+郭显光. 改进的熵值法及其在经济效益评价中的应用[J]. 系统工程理论与实践, 1998, 18(12): 98-102.
+
+\bibitem{hwang1981multiple}
+Hwang C L, Yoon K. Multiple Attribute Decision Making: Methods and Applications[M]. Berlin: Springer-Verlag, 1981.
+
+\bibitem{lin1965computer}
+Lin S. Computer solutions of the traveling salesman problem[J]. The Bell System Technical Journal, 1965, 44(10): 2245-2269.
+
+\bibitem{clarke1964scheduling}
+Clarke G, Wright J W. Scheduling of vehicles from a central depot to a number of delivery points[J]. Operations Research, 1964, 12(4): 568-581.
+
+\end{thebibliography}
+
+\newpage
+\input{content/appendix.tex}
+
+\end{document}
